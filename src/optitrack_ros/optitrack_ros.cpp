@@ -11,6 +11,9 @@ namespace optitrack_ros
 OptiTrackROS::OptiTrackROS() :
   nh_private_("~")
 {
+  nh_private_.param<std::string>("host", host_, "192.168.1.186");
+  nh_private_.param<int>("update_rate", update_rate_, 500);
+
   connection_ = std::shared_ptr<vrpn_Connection>(vrpn_get_connection_by_name(host_.c_str()));
 
   if (connection_->connected())

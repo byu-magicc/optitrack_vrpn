@@ -29,8 +29,8 @@ public:
 private:
   std::set<std::string> sender_name_blacklist_ = std::set<std::string>({"VRPN Control"});
 
-  std::string host_ = "192.168.1.186";
-  double update_rate_ = 500.0;
+  std::string host_;
+  int update_rate_;
 
   std::shared_ptr<vrpn_Connection> connection_;
   std::map<std::string,TrackerHandler> trackers_;
