@@ -10,7 +10,8 @@ add_compile_options(-std=c++17)
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   roscpp
-  tf
+  tf2
+  tf2_ros
 )
 
 ## System dependencies are found with CMake's conventions
@@ -105,7 +106,7 @@ find_package(VRPN REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES optitrack_ros
-  CATKIN_DEPENDS geometry_msgs roscpp tf
+  CATKIN_DEPENDS geometry_msgs roscpp tf2 tf2_ros
   DEPENDS VRPN
 )
 
@@ -131,7 +132,10 @@ add_library(${PROJECT_NAME}
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(${PROJECT_NAME} ${VRPN_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}
+  ${VRPN_LIBRARIES}
+  ${catkin_LIBRARIES}
+)
 
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
