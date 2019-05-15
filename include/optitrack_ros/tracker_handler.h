@@ -7,7 +7,6 @@
 #define OPTITRACK_ROS_TRACKER_HANDLER_H
 
 #include <ros/ros.h>
-#include <geometry_msgs/PoseStamped.h>
 
 #include <vrpn_Tracker.h>
 #include <vrpn_Connection.h>
@@ -28,18 +27,24 @@ public:
   static void position_callback_wrapper(void *userData, vrpn_TRACKERCB info);
 
 private:
+  enum VRPNIndex
+  {
+    X = 0,
+    Y = 1,
+    Z = 2,
+    W = 3
+  };
+
   std::string name_;
 
   std::shared_ptr<vrpn_Connection> connection_;
   vrpn_Tracker_Remote tracker_;
 
   ros::NodeHandle nh_;
-  ros::Publisher ned_pub_;
   ros::Publisher enu_pub_;
+  ros::Publisher ned_pub_;
 
   ros::Timer mainloop_timer_;
-
-  void mainloop_callback(const ros::TimerEvent& e);
 
   void position_callback(const vrpn_TRACKERCB& info);
 };

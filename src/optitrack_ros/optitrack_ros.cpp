@@ -13,13 +13,19 @@ OptiTrackROS::OptiTrackROS() :
 {
   connection_ = std::shared_ptr<vrpn_Connection>(vrpn_get_connection_by_name(host_.c_str()));
 
-  mainloop_timer_ = nh_.createTimer(ros::Duration(0.01), &OptiTrackROS::mainloop_callback, this);
-  tracker_update_timer_ = nh_.createTimer(ros::Duration(1.0), &OptiTrackROS::tracker_update_callback, this);
-}
+  if (connection_->connected())
+  {
+    ROS_INFO("Connected to VRPN server at %s", host_.c_str());
+  }
+  else
+  {
+    ROS_FATAL("Unable to connect to VRPN server at %s", host_.c_str());
+    ros::shutdown();
+  }
 
-OptiTrackROS::~OptiTrackROS()
-{
-  connection_->removeReference();
+
+  mainloop_timer_ = nh_.createTimer(ros::Duration(1.0 / update_rate_), &OptiTrackROS::mainloop_callback, this);
+  tracker_update_timer_ = nh_.createTimer(ros::Duration(1.0), &OptiTrackROS::tracker_update_callback, this);
 }
 
 void OptiTrackROS::mainloop_callback(const ros::TimerEvent& e)
