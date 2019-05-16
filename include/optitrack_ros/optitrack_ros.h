@@ -45,6 +45,7 @@
 #include <map>
 #include <set>
 
+#include <optitrack_ros/time_manager.h>
 #include <optitrack_ros/tracker_handler.h>
 
 namespace optitrack_ros
@@ -71,6 +72,7 @@ private:
 
   std::shared_ptr<vrpn_Connection> connection_;
   std::map<std::string,TrackerHandler> trackers_;
+  TimeManager time_manager_;
 
   ros::NodeHandle nh_;
   ros::NodeHandle nh_private_;

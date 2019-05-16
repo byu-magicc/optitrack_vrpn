@@ -51,6 +51,10 @@ OptiTrackROS::OptiTrackROS() :
   options_.frame = frame_;
   options_.ned_frame = ned_frame_;
 
+  int offset_samples;
+  nh_private_.param<int>("offset_samples", offset_samples, 100);
+  time_manager_.set_num_samples(offset_samples);
+
   connection_ = std::shared_ptr<vrpn_Connection>(vrpn_get_connection_by_name(host_.c_str()));
 
   if (connection_->connected())
@@ -84,7 +88,8 @@ void OptiTrackROS::tracker_update_callback(const ros::TimerEvent& e)
   {
     if (sender_name_blacklist_.count(connection_->sender_name(i)) == 0)
     {
-      auto result = trackers_.try_emplace(connection_->sender_name(i), connection_->sender_name(i), connection_, options_);
+      auto result = trackers_.try_emplace(connection_->sender_name(i),
+                                          connection_->sender_name(i), options_, connection_, time_manager_);
       if (result.second)
       {
         ROS_INFO("Added tracker %s", connection_->sender_name(i));

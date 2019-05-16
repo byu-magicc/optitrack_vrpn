@@ -42,12 +42,16 @@
 namespace optitrack_ros
 {
 
-TrackerHandler::TrackerHandler(const std::string& name, const std::shared_ptr<vrpn_Connection>& connection, const TrackerHandlerOptions& options) :
+TrackerHandler::TrackerHandler(const std::string& name,
+                               const TrackerHandlerOptions& options,
+                               const std::shared_ptr<vrpn_Connection>& connection,
+                               TimeManager& time_manager) :
   name_(name),
   options_(options),
   tf_child_frame_(name),
   tf_child_frame_ned_(name + "_ned"),
   connection_(connection),
+  time_manager_(time_manager),
   tracker_((name + "@" + options.host).c_str(), connection_.get())
 {
   rfu_to_flu_.setRPY(0.0, 0.0, M_PI_2); // rotate pi/2 (90deg) about z-axis
@@ -66,11 +70,7 @@ void TrackerHandler::position_callback_wrapper(void *userData, vrpn_TRACKERCB in
 
 void TrackerHandler::position_callback(const vrpn_TRACKERCB& info)
 {
-  //! @todo intelligent time stamp mechanism
-  ros::Time stamp = ros::Time::now();
-
-  tf2::Quaternion enu_to_body;
-  enu_to_body.setRPY(0.0, 0.0, M_PI/2.0); // rotate 90deg about z-axis
+  ros::Time stamp = time_manager_.resolve_timestamp(info.msg_time);
 
   // axis mappings for ENU:
   //   East  (X): OptiTrack Z

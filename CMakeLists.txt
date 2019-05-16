@@ -34,6 +34,7 @@ include_directories(
 
 add_library(${PROJECT_NAME}
   src/${PROJECT_NAME}/optitrack_ros.cpp
+  src/${PROJECT_NAME}/time_manager.cpp
   src/${PROJECT_NAME}/tracker_handler.cpp
 )
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

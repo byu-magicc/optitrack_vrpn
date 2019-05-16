@@ -29,83 +29,47 @@
  */
 
 /**
- * @file tracker_handler.h
+ * @file time_manager.cpp
  * @author Daniel Koch <daniel.p.koch@gmail.com>
  */
 
-#ifndef OPTITRACK_ROS_TRACKER_HANDLER_H
-#define OPTITRACK_ROS_TRACKER_HANDLER_H
-
-#include <ros/ros.h>
-#include <geometry_msgs/PoseStamped.h>
-#include <tf2_ros/transform_broadcaster.h>
-#include <tf2/LinearMath/Quaternion.h>
-
 #include <optitrack_ros/time_manager.h>
-
-#include <vrpn_Tracker.h>
-#include <vrpn_Connection.h>
-
-#include <memory>
 
 namespace optitrack_ros
 {
 
-/**
- * @brief Options for TrackerHandler class
- */
-struct TrackerHandlerOptions
+TimeManager::TimeManager() :
+  initialized_(false),
+  mean_offset_(0.0),
+  count_(0)
+{}
+
+ros::Time TimeManager::resolve_timestamp(const timeval& stamp)
 {
-  std::string host;
-  std::string frame;
-  std::string ned_frame;
-};
-
-/**
- * @brief Handles all callbacks for a single tracker (one tracker per rigid body)
- */
-class TrackerHandler
-{
-public:
-  TrackerHandler(const std::string& name,
-                 const TrackerHandlerOptions& options,
-                 const std::shared_ptr<vrpn_Connection>& connection,
-                 TimeManager& time_manager);
-
-  static void VRPN_CALLBACK position_callback_wrapper(void *userData, vrpn_TRACKERCB info);
-
-private:
-  enum VRPNIndex
+  if (count_ >= num_samples_)
   {
-    X = 0,
-    Y = 1,
-    Z = 2,
-    W = 3
-  };
+    return timeval_to_ros_time(stamp) + offset_;
+  }
+  else
+  {
+    count_++;
 
-  std::string name_;
-  const TrackerHandlerOptions& options_;
+    //! @todo outlier rejection
+    double offset = (ros::Time::now() - timeval_to_ros_time(stamp)).toSec();
+    mean_offset_ = ((count_ - 1) * mean_offset_ + offset) / count_; // recursive mean
 
-  std::string tf_child_frame_;
-  std::string tf_child_frame_ned_;
+    return ros::Time::now();
+  }
+}
 
-  std::shared_ptr<vrpn_Connection> connection_;
-  TimeManager& time_manager_;
-  vrpn_Tracker_Remote tracker_;
+void TimeManager::set_num_samples(size_t num_samples)
+{
+  num_samples_ = num_samples;
+}
 
-  ros::NodeHandle nh_;
-  ros::Publisher enu_pub_;
-  ros::Publisher ned_pub_;
-  tf2_ros::TransformBroadcaster tf_broadcaster_;
-
-  ros::Timer mainloop_timer_;
-
-  tf2::Quaternion rfu_to_flu_; //!< transforms body rotation from right-front-up to forward-left-up
-
-  void position_callback(const vrpn_TRACKERCB& info);
-  void send_transform(const geometry_msgs::PoseStamped& pose, const std::string& child_frame);
-};
+ros::Time TimeManager::timeval_to_ros_time(const timeval& stamp)
+{
+  return ros::Time(stamp.tv_sec, stamp.tv_usec*1000);
+}
 
 } // namespace optitrack_ros
-
-#endif // OPTITRACK_ROS_TRACKER_HANDLER_H
