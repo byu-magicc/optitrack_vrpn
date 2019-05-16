@@ -29,53 +29,37 @@
  */
 
 /**
- * @file time_manager.cpp
+ * @file time_manager.h
  * @author Daniel Koch <daniel.p.koch@gmail.com>
  */
 
-#include <optitrack_ros/time_manager.h>
+#ifndef OPTITRACK_VRPN_TIME_MANAGER_H
+#define OPTITRACK_VRPN_TIME_MANAGER_H
 
-namespace optitrack_ros
+#include <ros/time.h>
+
+namespace optitrack_vrpn
 {
 
-TimeManager::TimeManager() :
-  min_offset_(0.0),
-  count_(0)
-{}
-
-ros::Time TimeManager::resolve_timestamp(const timeval& stamp)
+class TimeManager
 {
-  if (count_ >= num_samples_)
-  {
-    return timeval_to_ros_time(stamp) + offset_;
-  }
-  else
-  {
-    double offset = (ros::Time::now() - timeval_to_ros_time(stamp)).toSec();
+public:
+  TimeManager();
+  ros::Time resolve_timestamp(const timeval& stamp);
+  void set_num_samples(size_t num_samples);
 
-    if (count_ == 0 || offset < min_offset_)
-    {
-      min_offset_ = offset;
-    }
-    count_++;
+private:
+  size_t num_samples_ = 100;
 
-    if (count_ == num_samples_)
-    {
-      offset_ = ros::Duration(min_offset_);
-    }
+  double min_offset_;
+  size_t count_;
 
-    return ros::Time::now();
-  }
-}
+  ros::Duration offset_;
 
-void TimeManager::set_num_samples(size_t num_samples)
-{
-  num_samples_ = num_samples;
-}
+  ros::Time timeval_to_ros_time(const timeval& stamp);
+};
 
-ros::Time TimeManager::timeval_to_ros_time(const timeval& stamp)
-{
-  return ros::Time(stamp.tv_sec, stamp.tv_usec*1000);
-}
+} // namespace optitrack_vrpn
 
-} // namespace optitrack_ros
+
+#endif // OPTITRACK_VRPN_TIME_MANAGER_H

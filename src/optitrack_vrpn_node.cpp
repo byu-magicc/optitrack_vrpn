@@ -29,18 +29,18 @@
  */
 
 /**
- * @file optitrack_ros_node.cpp
+ * @file optitrack_vrpn_node.cpp
  * @author Daniel Koch <daniel.p.koch@gmail.com>
  */
 
 #include <ros/ros.h>
-#include <optitrack_ros/optitrack_ros.h>
+#include <optitrack_vrpn/optitrack_vrpn.h>
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "optitrack_ros_node");
+  ros::init(argc, argv, "optitrack_vrpn_node");
 
-  optitrack_ros::OptiTrackROS handler;
+  optitrack_vrpn::OptiTrackVRPN handler;
   ros::spin();
 
   return 0;

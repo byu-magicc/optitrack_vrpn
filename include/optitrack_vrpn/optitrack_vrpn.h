@@ -29,37 +29,65 @@
  */
 
 /**
- * @file time_manager.h
+ * @file optitrack_vrpn.h
  * @author Daniel Koch <daniel.p.koch@gmail.com>
  */
 
-#ifndef OPTITRACK_ROS_TIME_MANAGER_H
-#define OPTITRACK_ROS_TIME_MANAGER_H
+#ifndef OPTITRACK_VRPN_OPTITRACK_VRPN_H
+#define OPTITRACK_VRPN_OPTITRACK_VRPN_H
 
-#include <ros/time.h>
+#include <ros/ros.h>
+#include <tf2_ros/static_transform_broadcaster.h>
 
-namespace optitrack_ros
+#include <vrpn_Connection.h>
+
+#include <memory>
+#include <map>
+#include <set>
+
+#include <optitrack_vrpn/time_manager.h>
+#include <optitrack_vrpn/tracker_handler.h>
+
+namespace optitrack_vrpn
 {
 
-class TimeManager
+/**
+ * @brief Manages the connection to Motive and initializes tracker handlers
+ */
+class OptiTrackVRPN
 {
 public:
-  TimeManager();
-  ros::Time resolve_timestamp(const timeval& stamp);
-  void set_num_samples(size_t num_samples);
+  OptiTrackVRPN();
 
 private:
-  size_t num_samples_ = 100;
+  std::set<std::string> sender_name_blacklist_ = std::set<std::string>({"VRPN Control"});
 
-  double min_offset_;
-  size_t count_;
+  std::string host_;
+  int update_rate_;
 
-  ros::Duration offset_;
+  std::string frame_;
+  std::string ned_frame_;
 
-  ros::Time timeval_to_ros_time(const timeval& stamp);
+  TrackerHandlerOptions options_;
+
+  std::shared_ptr<vrpn_Connection> connection_;
+  std::map<std::string,TrackerHandler> trackers_;
+  TimeManager time_manager_;
+
+  ros::NodeHandle nh_;
+  ros::NodeHandle nh_private_;
+
+  ros::Timer mainloop_timer_;
+  ros::Timer tracker_update_timer_;
+
+  tf2_ros::StaticTransformBroadcaster static_tf_broadcaster_;
+
+  void mainloop_callback(const ros::TimerEvent& e);
+  void tracker_update_callback(const ros::TimerEvent& e);
+
+  void publish_enu_to_ned_transform();
 };
 
-} // namespace optitrack_ros
+} // namespace optitrack_vrpn
 
-
-#endif // OPTITRACK_ROS_TIME_MANAGER_H
+#endif // OPTITRACK_VRPN_OPTITRACK_VRPN_H

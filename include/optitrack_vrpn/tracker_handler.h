@@ -33,22 +33,22 @@
  * @author Daniel Koch <daniel.p.koch@gmail.com>
  */
 
-#ifndef OPTITRACK_ROS_TRACKER_HANDLER_H
-#define OPTITRACK_ROS_TRACKER_HANDLER_H
+#ifndef OPTITRACK_VRPN_TRACKER_HANDLER_H
+#define OPTITRACK_VRPN_TRACKER_HANDLER_H
 
 #include <ros/ros.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <tf2_ros/transform_broadcaster.h>
 #include <tf2/LinearMath/Quaternion.h>
 
-#include <optitrack_ros/time_manager.h>
+#include <optitrack_vrpn/time_manager.h>
 
 #include <vrpn_Tracker.h>
 #include <vrpn_Connection.h>
 
 #include <memory>
 
-namespace optitrack_ros
+namespace optitrack_vrpn
 {
 
 /**
@@ -106,6 +106,6 @@ private:
   void send_transform(const geometry_msgs::PoseStamped& pose, const std::string& child_frame);
 };
 
-} // namespace optitrack_ros
+} // namespace optitrack_vrpn
 
-#endif // OPTITRACK_ROS_TRACKER_HANDLER_H
+#endif // OPTITRACK_VRPN_TRACKER_HANDLER_H

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(optitrack_ros)
+project(optitrack_vrpn)
 
 add_compile_options(-std=c++17)
 
@@ -17,7 +17,7 @@ find_package(VRPN REQUIRED)
 
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES optitrack_ros
+  LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS geometry_msgs roscpp tf2 tf2_ros
   DEPENDS VRPN
 )
@@ -33,7 +33,7 @@ include_directories(
 )
 
 add_library(${PROJECT_NAME}
-  src/${PROJECT_NAME}/optitrack_ros.cpp
+  src/${PROJECT_NAME}/optitrack_vrpn.cpp
   src/${PROJECT_NAME}/time_manager.cpp
   src/${PROJECT_NAME}/tracker_handler.cpp
 )
@@ -43,7 +43,7 @@ target_link_libraries(${PROJECT_NAME}
   ${VRPN_LIBRARIES}
 )
 
-add_executable(${PROJECT_NAME}_node src/optitrack_ros_node.cpp)
+add_executable(${PROJECT_NAME}_node src/optitrack_vrpn_node.cpp)
 set_target_properties(${PROJECT_NAME}_node PROPERTIES OUTPUT_NAME node PREFIX "")
 add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME}_node

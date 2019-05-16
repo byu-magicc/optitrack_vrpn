@@ -29,65 +29,53 @@
  */
 
 /**
- * @file optitrack_ros.h
+ * @file time_manager.cpp
  * @author Daniel Koch <daniel.p.koch@gmail.com>
  */
 
-#ifndef OPTITRACK_ROS_OPTITRACK_ROS_H
-#define OPTITRACK_ROS_OPTITRACK_ROS_H
+#include <optitrack_vrpn/time_manager.h>
 
-#include <ros/ros.h>
-#include <tf2_ros/static_transform_broadcaster.h>
-
-#include <vrpn_Connection.h>
-
-#include <memory>
-#include <map>
-#include <set>
-
-#include <optitrack_ros/time_manager.h>
-#include <optitrack_ros/tracker_handler.h>
-
-namespace optitrack_ros
+namespace optitrack_vrpn
 {
 
-/**
- * @brief Manages the connection to Motive and initializes tracker handlers
- */
-class OptiTrackROS
+TimeManager::TimeManager() :
+  min_offset_(0.0),
+  count_(0)
+{}
+
+ros::Time TimeManager::resolve_timestamp(const timeval& stamp)
 {
-public:
-  OptiTrackROS();
+  if (count_ >= num_samples_)
+  {
+    return timeval_to_ros_time(stamp) + offset_;
+  }
+  else
+  {
+    double offset = (ros::Time::now() - timeval_to_ros_time(stamp)).toSec();
 
-private:
-  std::set<std::string> sender_name_blacklist_ = std::set<std::string>({"VRPN Control"});
+    if (count_ == 0 || offset < min_offset_)
+    {
+      min_offset_ = offset;
+    }
+    count_++;
 
-  std::string host_;
-  int update_rate_;
+    if (count_ == num_samples_)
+    {
+      offset_ = ros::Duration(min_offset_);
+    }
 
-  std::string frame_;
-  std::string ned_frame_;
+    return ros::Time::now();
+  }
+}
 
-  TrackerHandlerOptions options_;
+void TimeManager::set_num_samples(size_t num_samples)
+{
+  num_samples_ = num_samples;
+}
 
-  std::shared_ptr<vrpn_Connection> connection_;
-  std::map<std::string,TrackerHandler> trackers_;
-  TimeManager time_manager_;
+ros::Time TimeManager::timeval_to_ros_time(const timeval& stamp)
+{
+  return ros::Time(stamp.tv_sec, stamp.tv_usec*1000);
+}
 
-  ros::NodeHandle nh_;
-  ros::NodeHandle nh_private_;
-
-  ros::Timer mainloop_timer_;
-  ros::Timer tracker_update_timer_;
-
-  tf2_ros::StaticTransformBroadcaster static_tf_broadcaster_;
-
-  void mainloop_callback(const ros::TimerEvent& e);
-  void tracker_update_callback(const ros::TimerEvent& e);
-
-  void publish_enu_to_ned_transform();
-};
-
-} // namespace optitrack_ros
-
-#endif // OPTITRACK_ROS_OPTITRACK_ROS_H
+} // namespace optitrack_vrpn

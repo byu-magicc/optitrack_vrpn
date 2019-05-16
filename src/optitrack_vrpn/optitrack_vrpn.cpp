@@ -29,17 +29,17 @@
  */
 
 /**
- * @file optitrack_ros.cpp
+ * @file optitrack_vrpn.cpp
  * @author Daniel Koch <daniel.p.koch@gmail.com>
  */
 
-#include <optitrack_ros/optitrack_ros.h>
+#include <optitrack_vrpn/optitrack_vrpn.h>
 #include <geometry_msgs/TransformStamped.h>
 
-namespace optitrack_ros
+namespace optitrack_vrpn
 {
 
-OptiTrackROS::OptiTrackROS() :
+OptiTrackVRPN::OptiTrackVRPN() :
   nh_private_("~")
 {
   nh_private_.param<std::string>("host", host_, "192.168.1.186");
@@ -69,11 +69,11 @@ OptiTrackROS::OptiTrackROS() :
 
   publish_enu_to_ned_transform();
 
-  mainloop_timer_ = nh_.createTimer(ros::Duration(1.0 / update_rate_), &OptiTrackROS::mainloop_callback, this);
-  tracker_update_timer_ = nh_.createTimer(ros::Duration(1.0), &OptiTrackROS::tracker_update_callback, this);
+  mainloop_timer_ = nh_.createTimer(ros::Duration(1.0 / update_rate_), &OptiTrackVRPN::mainloop_callback, this);
+  tracker_update_timer_ = nh_.createTimer(ros::Duration(1.0), &OptiTrackVRPN::tracker_update_callback, this);
 }
 
-void OptiTrackROS::mainloop_callback(const ros::TimerEvent& e)
+void OptiTrackVRPN::mainloop_callback(const ros::TimerEvent& e)
 {
   if (!connection_->doing_okay())
   {
@@ -82,7 +82,7 @@ void OptiTrackROS::mainloop_callback(const ros::TimerEvent& e)
   connection_->mainloop();
 }
 
-void OptiTrackROS::tracker_update_callback(const ros::TimerEvent& e)
+void OptiTrackVRPN::tracker_update_callback(const ros::TimerEvent& e)
 {
   for (int i = 0; connection_->sender_name(i) != NULL; i++)
   {
@@ -98,7 +98,7 @@ void OptiTrackROS::tracker_update_callback(const ros::TimerEvent& e)
   }
 }
 
-void OptiTrackROS::publish_enu_to_ned_transform()
+void OptiTrackVRPN::publish_enu_to_ned_transform()
 {
   geometry_msgs::TransformStamped enu_to_ned;
 
@@ -118,4 +118,4 @@ void OptiTrackROS::publish_enu_to_ned_transform()
   static_tf_broadcaster_.sendTransform(enu_to_ned);
 }
 
-} // namespace optitrack_ros
+} // namespace optitrack_vrpn

@@ -33,13 +33,13 @@
  * @author Daniel Koch <daniel.p.koch@gmail.com>
  */
 
-#include <optitrack_ros/tracker_handler.h>
+#include <optitrack_vrpn/tracker_handler.h>
 
 #include <geometry_msgs/TransformStamped.h>
 
 #include <cmath>
 
-namespace optitrack_ros
+namespace optitrack_vrpn
 {
 
 TrackerHandler::TrackerHandler(const std::string& name,
@@ -136,4 +136,4 @@ void TrackerHandler::send_transform(const geometry_msgs::PoseStamped &pose, cons
   tf_broadcaster_.sendTransform(tf);
 }
 
-} // namespace optitrack_ros
+} // namespace optitrack_vrpn
