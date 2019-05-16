@@ -86,14 +86,13 @@ void OptiTrackVRPN::tracker_update_callback(const ros::TimerEvent& e)
 {
   for (int i = 0; connection_->sender_name(i) != NULL; i++)
   {
-    if (sender_name_blacklist_.count(connection_->sender_name(i)) == 0)
+    if (sender_name_blacklist_.count(connection_->sender_name(i)) == 0
+          && trackers_.count(connection_->sender_name(i)) == 0)
     {
-      auto result = trackers_.try_emplace(connection_->sender_name(i),
-                                          connection_->sender_name(i), options_, connection_, time_manager_);
-      if (result.second)
-      {
-        ROS_INFO("Added tracker %s", connection_->sender_name(i));
-      }
+      trackers_.emplace(std::piecewise_construct,
+                        std::forward_as_tuple(connection_->sender_name(i)),
+                        std::forward_as_tuple(connection_->sender_name(i), options_, connection_, time_manager_));
+      ROS_INFO("Added tracker %s", connection_->sender_name(i));
     }
   }
 }
