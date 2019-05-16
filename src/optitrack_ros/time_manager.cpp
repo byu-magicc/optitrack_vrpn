@@ -39,8 +39,7 @@ namespace optitrack_ros
 {
 
 TimeManager::TimeManager() :
-  initialized_(false),
-  mean_offset_(0.0),
+  min_offset_(0.0),
   count_(0)
 {}
 
@@ -52,11 +51,18 @@ ros::Time TimeManager::resolve_timestamp(const timeval& stamp)
   }
   else
   {
+    double offset = (ros::Time::now() - timeval_to_ros_time(stamp)).toSec();
+
+    if (count_ == 0 || offset < min_offset_)
+    {
+      min_offset_ = offset;
+    }
     count_++;
 
-    //! @todo outlier rejection
-    double offset = (ros::Time::now() - timeval_to_ros_time(stamp)).toSec();
-    mean_offset_ = ((count_ - 1) * mean_offset_ + offset) / count_; // recursive mean
+    if (count_ == num_samples_)
+    {
+      offset_ = ros::Duration(min_offset_);
+    }
 
     return ros::Time::now();
   }

@@ -51,8 +51,7 @@ public:
 private:
   size_t num_samples_ = 100;
 
-  bool initialized_;
-  double mean_offset_;
+  double min_offset_;
   size_t count_;
 
   ros::Duration offset_;
