@@ -58,6 +58,7 @@ TrackerHandler::TrackerHandler(const std::string& name,
 
   enu_pub_ = nh_.advertise<geometry_msgs::PoseStamped>(name_ + "_enu", 1);
   ned_pub_ = nh_.advertise<geometry_msgs::PoseStamped>(name_ + "_ned", 1);
+  ned_att_pub_ = nh_.advertise<geometry_msgs::Quaternion>(name_ + "_att", 1);
 
   tracker_.register_change_handler(this, &TrackerHandler::position_callback_wrapper);
 }
@@ -114,6 +115,8 @@ void TrackerHandler::position_callback(const vrpn_TRACKERCB& info)
   ned_msg.pose.orientation.w =  info.quat[VRPNIndex::W];
   ned_pub_.publish(ned_msg);
   send_transform(ned_msg, tf_child_frame_ned_);
+
+  ned_att_pub_.publish(ned_msg.pose.orientation);
 }
 
 void TrackerHandler::send_transform(const geometry_msgs::PoseStamped &pose, const std::string &child_frame)

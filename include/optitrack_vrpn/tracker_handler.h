@@ -96,6 +96,7 @@ private:
   ros::NodeHandle nh_;
   ros::Publisher enu_pub_;
   ros::Publisher ned_pub_;
+  ros::Publisher ned_att_pub_;
   tf2_ros::TransformBroadcaster tf_broadcaster_;
 
   ros::Timer mainloop_timer_;
