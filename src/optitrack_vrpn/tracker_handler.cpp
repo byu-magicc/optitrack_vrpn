@@ -84,12 +84,12 @@ void TrackerHandler::position_callback(const vrpn_TRACKERCB& info)
   enu_msg.pose.position.y =  info.pos[VRPNIndex::X];
   enu_msg.pose.position.z =  info.pos[VRPNIndex::Y];
 
-  // first get rotation to right-left-up body frame, then rotate to forward-left-down
-  tf2::Quaternion enu_to_rlu(info.quat[VRPNIndex::Z], // x
+  // first get rotation to right-front-up body frame, then rotate to forward-left-up
+  tf2::Quaternion enu_to_rfu(info.quat[VRPNIndex::Z], // x
                              info.quat[VRPNIndex::X], // y
                              info.quat[VRPNIndex::Y], // z
                              info.quat[VRPNIndex::W]); // w
-  tf2::Quaternion quat = enu_to_rlu * rfu_to_flu_;
+  tf2::Quaternion quat = enu_to_rfu * rfu_to_flu_;
 
   enu_msg.pose.orientation.x =  quat.x();
   enu_msg.pose.orientation.y =  quat.y();
