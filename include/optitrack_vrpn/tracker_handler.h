@@ -104,6 +104,7 @@ private:
 
   void position_callback(const vrpn_TRACKERCB& info);
   void send_transform(const geometry_msgs::PoseStamped& pose, const std::string& child_frame);
+  std::string sanitize_name(const std::string& name);
 };
 
 } // namespace optitrack_vrpn
