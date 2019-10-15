@@ -92,7 +92,7 @@ void OptiTrackVRPN::tracker_update_callback(const ros::TimerEvent& e)
       trackers_.emplace(std::piecewise_construct,
                         std::forward_as_tuple(connection_->sender_name(i)),
                         std::forward_as_tuple(connection_->sender_name(i), options_, connection_, time_manager_));
-      ROS_INFO("Added tracker %s", connection_->sender_name(i));
+      ROS_INFO("Added tracker for rigid body \"%s\"", connection_->sender_name(i));
     }
   }
 }

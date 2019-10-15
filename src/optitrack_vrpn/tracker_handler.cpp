@@ -38,6 +38,7 @@
 #include <geometry_msgs/TransformStamped.h>
 
 #include <cmath>
+#include <sstream>
 
 namespace optitrack_vrpn
 {
@@ -56,8 +57,10 @@ TrackerHandler::TrackerHandler(const std::string& name,
 {
   rfu_to_flu_.setRPY(0.0, 0.0, M_PI_2); // rotate pi/2 (90deg) about z-axis
 
-  enu_pub_ = nh_.advertise<geometry_msgs::PoseStamped>(name_ + "_enu", 1);
-  ned_pub_ = nh_.advertise<geometry_msgs::PoseStamped>(name_ + "_ned", 1);
+  std::string topic_name = sanitize_name(name_);
+
+  enu_pub_ = nh_.advertise<geometry_msgs::PoseStamped>(topic_name + "_enu", 1);
+  ned_pub_ = nh_.advertise<geometry_msgs::PoseStamped>(topic_name + "_ned", 1);
 
   tracker_.register_change_handler(this, &TrackerHandler::position_callback_wrapper);
 }
@@ -134,6 +137,32 @@ void TrackerHandler::send_transform(const geometry_msgs::PoseStamped &pose, cons
   tf.transform.rotation.w = pose.pose.orientation.w;
 
   tf_broadcaster_.sendTransform(tf);
+}
+
+std::string TrackerHandler::sanitize_name(const std::string& name)
+{
+  std::stringstream stream;
+
+  bool first_character = true;
+  for (char c : name)
+  {
+    if (isalnum(c) || c == '/')
+    {
+      stream << c;
+    }
+    else if (c == '_' && !first_character)
+    {
+      stream << c;
+    }
+    else if (c == ' ')
+    {
+      stream << '_';
+    }
+
+    first_character = false;
+  }
+
+  return stream.str();
 }
 
 } // namespace optitrack_vrpn
