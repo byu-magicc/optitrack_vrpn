@@ -55,16 +55,33 @@ OptiTrackVRPN::OptiTrackVRPN() :
   nh_private_.param<int>("offset_samples", offset_samples, 100);
   time_manager_.set_num_samples(offset_samples);
 
-  connection_ = std::shared_ptr<vrpn_Connection>(vrpn_get_connection_by_name(host_.c_str()));
+  int connect_retries;
+  nh_private_.param<int>("connect_retries", connect_retries, 5);
 
-  if (connection_->connected())
+  while (ros::ok())
   {
-    ROS_INFO("Connected to VRPN server at %s", host_.c_str());
-  }
-  else
-  {
-    ROS_FATAL("Unable to connect to VRPN server at %s", host_.c_str());
-    ros::shutdown();
+    connection_ = std::shared_ptr<vrpn_Connection>(vrpn_get_connection_by_name(host_.c_str()));
+
+    if (connection_->connected())
+    {
+      ROS_INFO("Connected to VRPN server at %s", host_.c_str());
+      break;
+    }
+    else
+    {
+      if (connect_retries-- > 0)
+      {
+        ROS_WARN("Not connected to VRPN server at %s. Retrying in 1 second...", host_.c_str());
+
+        connection_.reset();
+        ros::Duration(1.0).sleep();
+      }
+      else
+      {
+        ROS_FATAL("Unable to connect to VRPN server at %s", host_.c_str());
+        ros::shutdown();
+      }
+    }
   }
 
   publish_enu_to_ned_transform();
